@@ -1,0 +1,187 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitap Listesi</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Kitap Listesi</h1>
+    <div id="bookList">
+        Kitapların listeleneceği alan 
+    </div>
+    <form id="addBookForm">
+        <input type="text" id="title" placeholder="Kitap Adı">
+        <input type="text" id="author" placeholder="Yazar">
+        <button type="submit">Kitap Ekle</button>
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            // Sayfa yüklendiğinde kitapları listele
+            listBooks();
+
+            // Kitap ekleme formunun gönderilmesi
+            $("#addBookForm").submit(function(event) {
+                event.preventDefault();
+                var title = $("#title").val();
+                var author = $("#author").val();
+                addBook(title, author);
+            });
+
+            // Kitapları listeleme fonksiyonu
+            function listBooks() {
+                $.ajax({
+                    url: "books",
+                    type: "GET",
+                    success: function(data) {
+                        var bookList = $("#bookList");
+                        bookList.empty();
+                        $.each(data, function(index, book) {
+                            var listItem = $("<div>");
+                            listItem.text(book.title + " - " + book.author);
+                            var deleteButton = $("<button>Delete</button>");
+                            deleteButton.click(function() {
+                                deleteBook(book.id);
+                            });
+                            var updateButton = $("<button>Update</button>");
+                            updateButton.click(function() {
+                                var newTitle = prompt("Enter new title:", book.title);
+                                var newAuthor = prompt("Enter new author:", book.author);
+                                updateBook(book.id, newTitle, newAuthor);
+                            });
+                            listItem.append(deleteButton);
+                            listItem.append(updateButton);
+                            bookList.append(listItem);
+                        });
+                    }
+                });
+            }
+
+            // Yeni kitap ekleme fonksiyonu
+            function addBook(title, author) {
+                var newBook = { title: title, author: author };
+                $.ajax({
+                    url: "books",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(newBook),
+                    success: function() {
+                        listBooks();
+                        $("#title").val("");
+                        $("#author").val("");
+                    }
+                });
+            }
+
+            // Kitap silme fonksiyonu
+            function deleteBook(id) {
+                $.ajax({
+                    url: "books/" + id,
+                    type: "DELETE",
+                    success: function() {
+                        listBooks();
+                    }
+                });
+            }
+
+            // Kitap güncelleme fonksiyonu
+            function updateBook(id, newTitle, newAuthor) {
+                var updatedBook = { title: newTitle, author: newAuthor };
+                $.ajax({
+                    url: "books/" + id,
+                    type: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify(updatedBook),
+                    success: function() {
+                        listBooks();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitap Listesi</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Kitap Listesi</h1>
+    <div id="bookList">
+        <!-- Kitapların listeleneceği alan -->
+    </div>
+    <form id="addBookForm">
+        <input type="text" id="title" placeholder="Kitap Adı">
+        <input type="text" id="author" placeholder="Yazar">
+        <button type="submit">Kitap Ekle</button>
+    </form>
+
+    <script>
+        // Kitap listesi için yerel depolama anahtarı
+        const localStorageKey = 'bookList';
+
+        $(document).ready(function() {
+            // Sayfa yüklendiğinde kitapları listele
+            listBooks();
+
+            // Kitap ekleme formunun gönderilmesi
+            $("#addBookForm").submit(function(event) {
+                event.preventDefault();
+                var title = $("#title").val();
+                var author = $("#author").val();
+                addBook(title, author);
+            });
+
+            // Kitapları listeleme fonksiyonu
+            function listBooks() {
+                // Yerel depolamadan kitapları al
+                var books = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+                var bookList = $("#bookList");
+                bookList.empty();
+                books.forEach(function(book, index) {
+                    var listItem = $("<div>");
+                    listItem.text(book.title + " - " + book.author);
+                    var deleteButton = $("<button>Delete</button>");
+                    deleteButton.click(function() {
+                        deleteBook(index);
+                    });
+                    listItem.append(deleteButton);
+                    bookList.append(listItem);
+                });
+            }
+
+            // Yeni kitap ekleme fonksiyonu
+            function addBook(title, author) {
+                // Yerel depolama verilerini güncelle
+                var books = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+                var newBook = { title: title, author: author };
+                books.push(newBook);
+                localStorage.setItem(localStorageKey, JSON.stringify(books));
+                // Kitapları tekrar listele
+                listBooks();
+                $("#title").val("");
+                $("#author").val("");
+            }
+
+            // Kitap silme fonksiyonu
+            function deleteBook(index) {
+                // Yerel depolama verilerini güncelle
+                var books = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+                books.splice(index, 1);
+                localStorage.setItem(localStorageKey, JSON.stringify(books));
+                // Kitapları tekrar listele
+                listBooks();
+            }
+        });
+    </script>
+</body>
+</html>
